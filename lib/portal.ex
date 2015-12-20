@@ -48,6 +48,15 @@ defmodule Portal do
     # Let's return the portal itself
     portal
   end
+
+  def push_left(portal) do
+    case Portal.Door.pop(portal.right) do
+      :error    -> :ok
+      {:ok, h}  -> Portal.Door.push(portal.left, h)
+    end
+
+    portal
+  end
 end
 
 defimpl Inspect, for: Portal do
