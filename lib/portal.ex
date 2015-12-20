@@ -1,4 +1,23 @@
 defmodule Portal do
+  use Application
+
+  def start(_type, _args) do
+    import Supervisor.Spec, warn: false
+
+    children = [
+      worker(Portal.Door, [])
+    ]
+
+    opts = [strategy: :simple_one_for_one, name: Portal.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
+
+  @doc """
+  Shoots a new door with the given 'color'.
+  """
+  def shoot(color) do
+    Supervisor.start_child(Portal.Supervisor, [color])
+  end
 
   defstruct [:left, :right]
 
@@ -19,7 +38,7 @@ defmodule Portal do
   Pushes data to the right in the given 'portal'.
   """
   def push_right(portal) do
-    # See if we ca pop data from left. If so, push the
+    # See if we can pop data from left. If so, push the
     # popped data to the right. Otherwise, do nothing.
     case Portal.Door.pop(portal.left) do
       :error    -> :ok
@@ -29,26 +48,7 @@ defmodule Portal do
     # Let's return the portal itself
     portal
   end
-
-  use Application
-
-  # See http://elixir-lang.org/docs/stable/elixir/Application.html
-  # for more information on OTP Applications
-  def start(_type, _args) do
-    import Supervisor.Spec, warn: false
-
-    children = [
-      # Define workers and child supervisors to be supervised
-      # worker(Portal.Worker, [arg1, arg2, arg3]),
-    ]
-
-    # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
-    # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Portal.Supervisor]
-    Supervisor.start_link(children, opts)
-  end
 end
-
 
 defimpl Inspect, for: Portal do
   def inspect(%Portal{left: left, right: right}, _) do
